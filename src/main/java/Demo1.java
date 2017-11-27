@@ -1,17 +1,19 @@
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.broadcast.Broadcast;
 import scala.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class Demo1 {
 
@@ -20,58 +22,74 @@ public class Demo1 {
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
 
-        JavaRDD<String> lines = sc.parallelize(Lists.newArrayList("aaa", "panda", "i like panda","ddd","aaa"));
+//        JavaRDD<String> lines = sc.parallelize(Lists.newArrayList("aaa", "panda", "i like panda","ddd","aaa"));
+        JavaRDD<String> lines = sc.textFile("testFile", 8);
 
-        JavaRDD<String> testLines = lines.mapPartitions(new FlatMapFunction<Iterator<String>, String>() {
-            private static final long serialVersionUID = 1L;
+        List<String> testList = Lists.newArrayList("1", "2", "3", "5");
 
-            public Iterable<String> call(Iterator<String> it) throws Exception {
-                List<String> list = new ArrayList<String>();
-                String exposure = null;
-                while (it.hasNext()) {
-                    exposure = it.next();
+        Broadcast<List<String>> cast = sc.broadcast(testList);
 
-                    list.add(exposure);
+        JavaRDD<String> resultLines = lines.mapPartitions(new FlatMapFunction<Iterator<String>, String>() {
+                    @Override
+                    public Iterable<String> call(Iterator<String> stringIterator) throws Exception {
+
+                        List<String> wordList = new ArrayList<>();
+                        while (stringIterator.hasNext()) {
+                            String line = stringIterator.next();
+
+                            if (StringUtils.isBlank(line)) {
+                                continue;
+                            }
+
+                            String[] words = line.split(" ");
+
+                            wordList.addAll(Arrays.asList(words));
+
+                            System.out.println(cast.getValue());
+                        }
+                        return wordList;
+                    }
+                }).mapPartitionsToPair(new PairFlatMapFunction<Iterator<String>, String, Integer>() {
+                    @Override
+                    public Iterable<Tuple2<String, Integer>> call(Iterator<String> stringIterator) throws Exception {
+                        List<Tuple2<String, Integer>> result = new ArrayList<>();
+
+
+                        while (stringIterator.hasNext()) {
+                    String word = stringIterator.next();
+                    result.add(new Tuple2<>(word, 1));
                 }
-                return list;
-            }
-        }).mapToPair(new PairFunction<String, String, Integer>() {
-            private static final long serialVersionUID = 1L;
 
-            public Tuple2<String, Integer> call(String s) {
-                return new Tuple2<String, Integer>(s, 1);
+                return result;
             }
         }).reduceByKey(new Function2<Integer, Integer, Integer>() {
-            private static final long serialVersionUID = 1L;
-
-            public Integer call(Integer i1, Integer i2) {
-                return i1 + i2;
+            @Override
+            public Integer call(Integer v1, Integer v2) throws Exception {
+                return v1 + v2;
             }
-        }, 8).mapPartitions(new FlatMapFunction<Iterator<Tuple2<String, Integer>>, String>() {
-            private static final long serialVersionUID = 1L;
-
+        }).mapPartitions(new FlatMapFunction<Iterator<Tuple2<String, Integer>>, String>() {
+            @Override
             public Iterable<String> call(Iterator<Tuple2<String, Integer>> it) throws Exception {
-                List<String> list = new ArrayList<String>();
-                Tuple2<String, Integer> exposure = null;
+                List<String> result = new ArrayList<>();
+
                 while (it.hasNext()) {
-                    exposure = it.next();
-                    if (exposure == null || StringUtils.isBlank(exposure._1)) continue;
-                    list.add(exposure._1 + "\t" + exposure._2);
+                    Tuple2<String, Integer> next = it.next();
+                    result.add(next._1 + ">" + next._2);
                 }
-                return list;
+
+                return result;
             }
         });
 
-//        lines.saveAsTextFile("E:\\abc");
-        List<String> stringList = testLines.collect();
 
-        System.out.println(stringList);
 
-        try {
-            TimeUnit.MINUTES.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+
+        System.out.println(resultLines.collect());
+
+        System.out.println();
+
+
 
     }
 }

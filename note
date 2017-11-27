@@ -1,0 +1,16 @@
+map 单独处理一列
+
+mapPartitions 对分块批量map处理
+
+mapToPair 单独处理一列，变成pair
+
+mapPartitionsToPair 对分块批量pair
+
+reduceByKey
+
+mapPartitionsWithInputSplit 带inputSplit的分块批量map处理
+
+groupByKey
+
+
+
