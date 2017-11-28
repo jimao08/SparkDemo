@@ -13,4 +13,7 @@ mapPartitionsWithInputSplit 带inputSplit的分块批量map处理
 groupByKey
 
 
+submit的例子：
+spark-submit --master local --class Demo5 C:\Users\admin\tools\workspace\SparkDemo\target\SparkDemo-1.0-SNAPSHOT.jar
+
 
