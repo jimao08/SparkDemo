@@ -11,9 +11,6 @@ public class Demo6 {
     public static void main(String[] args) throws Exception{
         List<String> pvLines = FileUtils.readLines(new File("testPvFile"));
 
-        List<String> clickLines = FileUtils.readLines(new File("testClickFile"));
-
-
         //key:uid_cid,value：pv计数
         Map<String, Integer> pvMap = new HashMap<>();
 
@@ -27,6 +24,7 @@ public class Demo6 {
 
 
         //key:uid_cid,value:cv计数
+        List<String> clickLines = FileUtils.readLines(new File("testClickFile"));
         Map<String, Integer> clickMap = new HashMap<>();
 
         for (String clickLine : clickLines) {
@@ -34,6 +32,7 @@ public class Demo6 {
 
             String key = split[0] + "_" + split[3];
 
+            //点击没有num，每次+1
             clickMap.put(key, clickMap.getOrDefault(key, 0) + 1);
         }
 
