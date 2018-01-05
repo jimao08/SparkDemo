@@ -32,7 +32,6 @@ public class Demo3 {
 
         ctx = new JavaSparkContext(sparkConf);
 
-
         JavaPairRDD<String, Integer> rdd1 = getRdd("testFile");
         System.out.println(rdd1.collect().size());
 
