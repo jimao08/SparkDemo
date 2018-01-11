@@ -11,15 +11,41 @@ public class SerializerOjbect implements Serializable{
     private int ival;
     private List<String> list;
     private double dval;
-    private CondType condType;
+    private SerializerOjbectB b;
 
     public SerializerOjbect(int ival, List<String> list, double dval) {
         this.ival = ival;
         this.list = list;
         this.dval = dval;
-        condType = CondType.and;
+        b = null;
     }
 
+    public SerializerOjbect(int ival, List<String> list, double dval, CondType condType, SerializerOjbectB b) {
+        this.ival = ival;
+        this.list = list;
+        this.dval = dval;
+        this.b = b;
+    }
+
+    public void setB(SerializerOjbectB b) {
+        this.b = b;
+    }
+
+    public int getIval() {
+        return ival;
+    }
+
+    public List<String> getList() {
+        return list;
+    }
+
+    public double getDval() {
+        return dval;
+    }
+
+    public SerializerOjbectB getB() {
+        return b;
+    }
 
     @Override
     public String toString() {
@@ -27,7 +53,7 @@ public class SerializerOjbect implements Serializable{
                 "ival=" + ival +
                 ", list=" + list +
                 ", dval=" + dval +
-                ", condType=" + condType +
+                ", b=" +
                 '}';
     }
 
@@ -39,35 +65,35 @@ public class SerializerOjbect implements Serializable{
     }
 
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
-//        DataOutputStream output = new DataOutputStream(out);
+//    private void writeObject(ObjectOutputStream out) throws IOException {
+////        DataOutputStream output = new DataOutputStream(out);
+////
+////        out.writeInt(list.size());
+////        if (list != null && !list.isEmpty()) {
+////            for (String s : list) {
+////                output.writeUTF(s);
+////            }
+////        }
+//        System.out.println("write object");
 //
-//        out.writeInt(list.size());
-//        if (list != null && !list.isEmpty()) {
-//            for (String s : list) {
-//                output.writeUTF(s);
-//            }
-//        }
-        System.out.println("write object");
-
-        out.defaultWriteObject();
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        DataInputStream input = new DataInputStream(in);
+//        out.defaultWriteObject();
+//    }
 //
-//        int size = input.readInt();
+//    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+////        DataInputStream input = new DataInputStream(in);
+////
+////        int size = input.readInt();
+////
+////        if (size != 0) {
+////            list = new ArrayList<>();
+////            for (int i = 0; i < size; i++) {
+////                String s =  input.readUTF();
+////                System.out.println("read object:" + s);
+////                list.add(s);
+////            }
+////        }
 //
-//        if (size != 0) {
-//            list = new ArrayList<>();
-//            for (int i = 0; i < size; i++) {
-//                String s =  input.readUTF();
-//                System.out.println("read object:" + s);
-//                list.add(s);
-//            }
-//        }
-
-        in.defaultReadObject();
-    }
+//        in.defaultReadObject();
+//    }
 
 }
